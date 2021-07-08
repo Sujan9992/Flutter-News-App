@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:rest_api/databaseHelper.dart';
 
 void main() {
   runApp(
@@ -21,7 +22,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<List> getNews(page) async {
     final String url =
-        'https://newsapi.org/v2/everything?apikey=fb1fe456b3af4227b24584a13b567a65&domains=wsj.com&pageSize=5&page=$page&language=en';
+        'https://newsapi.org/v2/everything?apikey=fb1fe456b3af4227b24584a13b567a65&domains=wsj.com&pageSize=10&page=$page&language=en';
     Response res = await get(
       Uri.parse(url),
     );
@@ -71,8 +72,6 @@ class _MyAppState extends State<MyApp> {
       page = 1;
     }
   }
-
-  bool isPressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -222,18 +221,9 @@ class _MyAppState extends State<MyApp> {
                                           SizedBox(
                                             width: 8.0,
                                           ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                isPressed = !isPressed;
-                                              });
-                                            },
-                                            child: Icon(
-                                              Icons.favorite,
-                                              color: isPressed
-                                                  ? Colors.red
-                                                  : Colors.white,
-                                            ),
+                                          Icon(
+                                            Icons.favorite,
+                                            color: Colors.white,
                                           ),
                                         ],
                                       ),
@@ -250,7 +240,7 @@ class _MyAppState extends State<MyApp> {
                   },
                 ),
               ),
-              Container(),
+              LocalData(),
             ],
           ),
         ),
@@ -259,27 +249,66 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class PageDetail extends StatelessWidget {
+class PageDetail extends StatefulWidget {
   final List<dynamic> detail;
   final int index;
 
   PageDetail(this.detail, this.index);
 
   @override
+  _PageDetailState createState() => _PageDetailState();
+}
+
+class _PageDetailState extends State<PageDetail> {
+  bool isPressed = true;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          // Navigator.pop(context);
+          await DatabaseHelper.instance.insert(
+            {
+              DatabaseHelper.columnName: widget.detail[widget.index]['title'],
+            },
+          );
+          // await DatabaseHelper.instance.delete(10);
+          // List<Map<String, dynamic>> query =
+          //     await DatabaseHelper.instance.queryAll();
+          // print(i);
+          // print(query);
+          setState(() {
+            isPressed = !isPressed;
+          });
+        },
+        backgroundColor: Colors.grey,
+        child: Icon(
+          Icons.favorite,
+          color: isPressed ? Colors.white : Colors.red,
+          size: 40.0,
+        ),
+      ),
       appBar: AppBar(
         title: Text(
-          detail[index]['title'],
+          widget.detail[widget.index]['title'],
         ),
       ),
       body: SafeArea(
         child: Container(
+          margin: EdgeInsets.all(
+            10.0,
+          ),
           child: Column(
             children: <Widget>[
               Container(
-                child: Image.network(
-                  detail[index]['urlToImage'],
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                    15.0,
+                  ),
+                  child: Image.network(
+                    widget.detail[widget.index]['urlToImage'],
+                  ),
                 ),
               ),
               SizedBox(
@@ -290,7 +319,7 @@ class PageDetail extends StatelessWidget {
                 children: [
                   Container(
                     child: Text(
-                      detail[index]['author'],
+                      widget.detail[widget.index]['author'],
                       style: TextStyle(
                         color: Colors.green,
                         fontSize: 25.0,
@@ -302,7 +331,7 @@ class PageDetail extends StatelessWidget {
                   ),
                   Container(
                     child: Text(
-                      detail[index]['publishedAt'],
+                      widget.detail[widget.index]['publishedAt'],
                       style: TextStyle(
                         color: Colors.green,
                         fontSize: 20.0,
@@ -316,7 +345,7 @@ class PageDetail extends StatelessWidget {
               ),
               Container(
                 child: Text(
-                  detail[index]['content'],
+                  widget.detail[widget.index]['content'],
                   style: TextStyle(
                     fontSize: 25.0,
                   ),
@@ -325,6 +354,51 @@ class PageDetail extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class LocalData extends StatefulWidget {
+  const LocalData({Key? key}) : super(key: key);
+
+  @override
+  _LocalDataState createState() => _LocalDataState();
+}
+
+class _LocalDataState extends State<LocalData> {
+  Future<List> getLocalData() async {
+    List<Map<String, dynamic>> query = await DatabaseHelper.instance.queryAll();
+    return query;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: FutureBuilder(
+        future: getLocalData(),
+        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+          if (snapshot.hasData) {
+            List? queries = snapshot.data;
+            return ListView.builder(
+              itemCount: queries!.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  child: Card(
+                    child: ListTile(
+                      title: Text(
+                        queries[index]['_name'],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       ),
     );
   }
