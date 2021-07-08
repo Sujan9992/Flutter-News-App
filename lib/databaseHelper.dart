@@ -8,7 +8,12 @@ class DatabaseHelper {
   static final _dbVer = 1;
   static final _tableName = 'newsData';
   static final columnId = '_id';
-  static final columnName = '_name';
+  static final title = 'title';
+  static final description = 'description';
+  static final content = 'content';
+  static final urlToImage = 'urlToImage';
+  static final author = 'author';
+  static final publishedAt = 'publishedAt';
 
   DatabaseHelper._constructor();
 
@@ -39,7 +44,12 @@ class DatabaseHelper {
     db.execute('''
       CREATE TABLE $_tableName (
       $columnId INTEGER PRIMARY KEY,
-      $columnName TEXT NOT NULL )
+      $title TEXT NOT NULL,
+      $description TEXT NOT NULL,
+      $content TEXT NOT NULL,
+      $urlToImage TEXT NOT NULL,
+      $author TEXT NOT NULL,
+      $publishedAt TEXT NOT NULL )
       ''');
   }
 

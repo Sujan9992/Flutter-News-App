@@ -268,13 +268,24 @@ class _PageDetailState extends State<PageDetail> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           // Navigator.pop(context);
-          await DatabaseHelper.instance.insert(
-            {
-              DatabaseHelper.columnName: widget.detail[widget.index]['title'],
-            },
-          );
+          if (widget.detail[widget.index]['_id'] == null) {
+            await DatabaseHelper.instance.insert(
+              {
+                DatabaseHelper.title: widget.detail[widget.index]['title'],
+                DatabaseHelper.description: widget.detail[widget.index]
+                    ['description'],
+                DatabaseHelper.content: widget.detail[widget.index]['content'],
+                DatabaseHelper.urlToImage: widget.detail[widget.index]
+                    ['urlToImage'],
+                DatabaseHelper.author: widget.detail[widget.index]['author'],
+                DatabaseHelper.publishedAt: widget.detail[widget.index]
+                    ['publishedAt'],
+              },
+            );
+          }
           // await DatabaseHelper.instance.delete(10);
           // List<Map<String, dynamic>> query =
+
           //     await DatabaseHelper.instance.queryAll();
           // print(i);
           // print(query);
@@ -282,11 +293,11 @@ class _PageDetailState extends State<PageDetail> {
             isPressed = !isPressed;
           });
         },
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.grey[850],
         child: Icon(
           Icons.favorite,
           color: isPressed ? Colors.white : Colors.red,
-          size: 40.0,
+          size: 30.0,
         ),
       ),
       appBar: AppBar(
@@ -379,16 +390,84 @@ class _LocalDataState extends State<LocalData> {
         future: getLocalData(),
         builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
           if (snapshot.hasData) {
-            List? queries = snapshot.data;
+            List? body = snapshot.data;
             return ListView.builder(
-              itemCount: queries!.length,
+              itemCount: body!.length,
               itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  child: Card(
-                    child: ListTile(
-                      title: Text(
-                        queries[index]['_name'],
-                      ),
+                return GestureDetector(
+                  onLongPress: () async {
+                    print('Long Press');
+                    await DatabaseHelper.instance.delete(body[index]['_id']);
+                    setState(() {});
+                  },
+                  child: Container(
+                    margin: EdgeInsets.all(10.0),
+                    padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[850],
+                      borderRadius: BorderRadius.circular(15.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade600.withOpacity(0.5),
+                          blurRadius: 5,
+                          offset: Offset.fromDirection(0, 4),
+                          spreadRadius: 3.0,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              15.0,
+                            ),
+                            child: Image.network(
+                              body[index]['urlToImage'],
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Container(
+                              child: Text(
+                                body[index]['author'],
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 25.0,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 15.0,
+                            ),
+                            Container(
+                              child: Text(
+                                body[index]['publishedAt'],
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 20.0,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 15.0,
+                            ),
+                          ],
+                        ),
+                        Container(
+                          child: Text(
+                            body[index]['content'],
+                            style: TextStyle(
+                              fontSize: 25.0,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
