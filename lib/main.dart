@@ -1,24 +1,23 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'package:rest_api/databaseHelper.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter/services.dart';
+import 'screens/favoritePage.dart';
+import 'package:rest_api/screens/detailsPage.dart';
 
 void main() {
   runApp(
-    MyApp(),
+    Homepage(),
   );
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+class Homepage extends StatefulWidget {
+  const Homepage({Key? key}) : super(key: key);
 
   @override
-  _MyAppState createState() => _MyAppState();
+  _HomepageState createState() => _HomepageState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _HomepageState extends State<Homepage> {
   ScrollController _scrollController = ScrollController();
   int page = 1;
 
@@ -211,12 +210,13 @@ class _MyAppState extends State<MyApp> {
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.all(3.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
                                           children: [
                                             Text(
-                                              body[index]['author'] ?? 'Sujan',
+                                              body[index]['author'] ??
+                                                  'Unknown',
                                               style: TextStyle(
                                                 fontSize: 18.0,
                                                 color: Colors.grey[400],
@@ -242,242 +242,6 @@ class _MyAppState extends State<MyApp> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class PageDetail extends StatefulWidget {
-  final List<dynamic> detail;
-  final int index;
-
-  PageDetail(this.detail, this.index);
-
-  @override
-  _PageDetailState createState() => _PageDetailState();
-}
-
-class _PageDetailState extends State<PageDetail> {
-  bool isPressed = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // Navigator.pop(context);
-          if (widget.detail[widget.index]['_id'] == null) {
-            await DatabaseHelper.instance.insert(
-              {
-                DatabaseHelper.title: widget.detail[widget.index]['title'],
-                DatabaseHelper.description: widget.detail[widget.index]
-                    ['description'],
-                DatabaseHelper.urlToImage: widget.detail[widget.index]
-                    ['urlToImage'],
-                DatabaseHelper.author: widget.detail[widget.index]['author'],
-                DatabaseHelper.publishedAt: widget.detail[widget.index]
-                    ['publishedAt'],
-              },
-            );
-          }
-          setState(() {
-            isPressed = !isPressed;
-          });
-        },
-        backgroundColor: Colors.grey[850],
-        child: Icon(
-          Icons.favorite,
-          color: isPressed ? Colors.white : Colors.red,
-          size: 30.0,
-        ),
-      ),
-      appBar: AppBar(
-        title: Text(
-          widget.detail[widget.index]['title'],
-        ),
-      ),
-      body: SafeArea(
-        child: Container(
-          margin: EdgeInsets.all(
-            10.0,
-          ),
-          child: Column(
-            children: <Widget>[
-              Container(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(
-                    15.0,
-                  ),
-                  child: Image.network(
-                    widget.detail[widget.index]['urlToImage'],
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 15.0,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    child: Text(
-                      widget.detail[widget.index]['author'] ?? 'Sujan',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 25.0,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  Container(
-                    child: Text(
-                      widget.detail[widget.index]['publishedAt'],
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 20.0,
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                ],
-              ),
-              Container(
-                child: Text(
-                  widget.detail[widget.index]['description'],
-                  style: TextStyle(
-                    fontSize: 25.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class LocalData extends StatefulWidget {
-  const LocalData({Key? key}) : super(key: key);
-
-  @override
-  _LocalDataState createState() => _LocalDataState();
-}
-
-class _LocalDataState extends State<LocalData> {
-  Future<List> getLocalData() async {
-    List<Map<String, dynamic>> query = await DatabaseHelper.instance.queryAll();
-    return query;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: FutureBuilder(
-        future: getLocalData(),
-        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
-          if (snapshot.hasData) {
-            List? body = snapshot.data;
-            return ListView.builder(
-              itemCount: body!.length,
-              itemBuilder: (BuildContext context, int index) {
-                return GestureDetector(
-                  onLongPress: () async {
-                    await DatabaseHelper.instance.delete(body[index]['_id']);
-                    HapticFeedback.heavyImpact();
-                    Fluttertoast.showToast(
-                      msg: 'News deleted.',
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.BOTTOM,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.grey[600],
-                      textColor: Colors.grey[300],
-                      fontSize: 15.0,
-                    );
-                    setState(() {});
-                  },
-                  child: Container(
-                    margin: EdgeInsets.all(10.0),
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[850],
-                      borderRadius: BorderRadius.circular(15.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.shade600.withOpacity(0.5),
-                          blurRadius: 5,
-                          offset: Offset.fromDirection(0, 4),
-                          spreadRadius: 3.0,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              15.0,
-                            ),
-                            child: Image.network(
-                              body[index]['urlToImage'],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 15.0,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Container(
-                              child: Text(
-                                body[index]['author'],
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 25.0,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 15.0,
-                            ),
-                            Container(
-                              child: Text(
-                                body[index]['publishedAt'],
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 20.0,
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 15.0,
-                            ),
-                          ],
-                        ),
-                        Container(
-                          child: Text(
-                            body[index]['description'],
-                            style: TextStyle(
-                              fontSize: 25.0,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        },
       ),
     );
   }
