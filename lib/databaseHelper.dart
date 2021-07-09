@@ -10,7 +10,6 @@ class DatabaseHelper {
   static final columnId = '_id';
   static final title = 'title';
   static final description = 'description';
-  static final content = 'content';
   static final urlToImage = 'urlToImage';
   static final author = 'author';
   static final publishedAt = 'publishedAt';
@@ -46,7 +45,6 @@ class DatabaseHelper {
       $columnId INTEGER PRIMARY KEY,
       $title TEXT NOT NULL,
       $description TEXT NOT NULL,
-      $content TEXT NOT NULL,
       $urlToImage TEXT NOT NULL,
       $author TEXT NOT NULL,
       $publishedAt TEXT NOT NULL )

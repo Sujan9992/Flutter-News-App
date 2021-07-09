@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:rest_api/databaseHelper.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(
@@ -56,18 +58,21 @@ class _MyAppState extends State<MyApp> {
   }
 
   void getMoreData() {
-    print('Generating more data.');
-    print(page);
     page++;
     setState(() {});
+    getNews(page).then(
+      (value) => _scrollController.jumpTo(0.1),
+    );
   }
 
   void getPreviousData() {
-    print('Get Previous data.');
-    print(page);
     if (page >= 2) {
       page--;
       setState(() {});
+      getNews(page).then(
+        (value) => _scrollController
+            .jumpTo(_scrollController.position.maxScrollExtent - 0.1),
+      );
     } else {
       page = 1;
     }
@@ -115,124 +120,117 @@ class _MyAppState extends State<MyApp> {
                       AsyncSnapshot<List<dynamic>> snapshot) {
                     if (snapshot.hasData) {
                       List? body = snapshot.data;
-                      return ListView.builder(
-                          controller: _scrollController,
-                          itemCount: body!.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 0),
-                              child: Container(
-                                margin: EdgeInsets.all(10.0),
-                                padding: EdgeInsets.all(8.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[850],
-                                  borderRadius: BorderRadius.circular(15.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color:
-                                          Colors.grey.shade600.withOpacity(0.5),
-                                      blurRadius: 5,
-                                      offset: Offset.fromDirection(0, 4),
-                                      spreadRadius: 3.0,
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    InkWell(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      splashColor: Colors.red,
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                PageDetail(body, index),
-                                          ),
-                                        );
-                                      },
-                                      child: Column(
-                                        children: [
-                                          Column(
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Container(
-                                                  height: 180.0,
-                                                  width: double.infinity,
-                                                  decoration: BoxDecoration(
-                                                    //let's add the height
-
-                                                    image: DecorationImage(
-                                                        image: NetworkImage(
-                                                            body[index]
-                                                                ['urlToImage']),
-                                                        fit: BoxFit.cover),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                      12.0,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    body[index]['title'],
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 20.0,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Text(
-                                                  body[index]['description'],
-                                                  style: TextStyle(
-                                                    color: Colors.grey[350],
-                                                    fontSize: 15.0,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                      return Scrollbar(
+                        interactive: true,
+                        controller: _scrollController,
+                        child: ListView.builder(
+                            controller: _scrollController,
+                            itemCount: body!.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    10.0, 5.0, 10.0, 0),
+                                child: Container(
+                                  margin: EdgeInsets.all(10.0),
+                                  padding: EdgeInsets.all(8.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[850],
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.shade600
+                                            .withOpacity(0.5),
+                                        blurRadius: 5,
+                                        offset: Offset.fromDirection(0, 4),
+                                        spreadRadius: 3.0,
                                       ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(15.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          GestureDetector(
-                                            child: Icon(
-                                              Icons.share,
-                                              color: Colors.white,
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      InkWell(
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                        splashColor: Colors.red,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PageDetail(body, index),
                                             ),
-                                          ),
-                                          SizedBox(
-                                            width: 8.0,
-                                          ),
-                                          Icon(
-                                            Icons.favorite,
-                                            color: Colors.white,
-                                          ),
-                                        ],
+                                          );
+                                        },
+                                        child: Column(
+                                          children: [
+                                            Column(
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(3.0),
+                                                  child: Container(
+                                                    height: 180.0,
+                                                    width: double.infinity,
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15.0),
+                                                      child: FadeInImage
+                                                          .assetNetwork(
+                                                              placeholder:
+                                                                  'assets/1494.gif',
+                                                              image: body[
+                                                                      index][
+                                                                  'urlToImage']),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(3.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        body[index]['title'],
+                                                        style: TextStyle(
+                                                          color:
+                                                              Colors.grey[300],
+                                                          fontSize: 20.0,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      Padding(
+                                        padding: const EdgeInsets.all(3.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              body[index]['author'] ?? 'Sujan',
+                                              style: TextStyle(
+                                                fontSize: 18.0,
+                                                color: Colors.grey[400],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          });
+                              );
+                            }),
+                      );
                     }
                     return Center(
                       child: CircularProgressIndicator(),
@@ -274,7 +272,6 @@ class _PageDetailState extends State<PageDetail> {
                 DatabaseHelper.title: widget.detail[widget.index]['title'],
                 DatabaseHelper.description: widget.detail[widget.index]
                     ['description'],
-                DatabaseHelper.content: widget.detail[widget.index]['content'],
                 DatabaseHelper.urlToImage: widget.detail[widget.index]
                     ['urlToImage'],
                 DatabaseHelper.author: widget.detail[widget.index]['author'],
@@ -283,12 +280,6 @@ class _PageDetailState extends State<PageDetail> {
               },
             );
           }
-          // await DatabaseHelper.instance.delete(10);
-          // List<Map<String, dynamic>> query =
-
-          //     await DatabaseHelper.instance.queryAll();
-          // print(i);
-          // print(query);
           setState(() {
             isPressed = !isPressed;
           });
@@ -330,7 +321,7 @@ class _PageDetailState extends State<PageDetail> {
                 children: [
                   Container(
                     child: Text(
-                      widget.detail[widget.index]['author'],
+                      widget.detail[widget.index]['author'] ?? 'Sujan',
                       style: TextStyle(
                         color: Colors.green,
                         fontSize: 25.0,
@@ -356,7 +347,7 @@ class _PageDetailState extends State<PageDetail> {
               ),
               Container(
                 child: Text(
-                  widget.detail[widget.index]['content'],
+                  widget.detail[widget.index]['description'],
                   style: TextStyle(
                     fontSize: 25.0,
                   ),
@@ -396,8 +387,17 @@ class _LocalDataState extends State<LocalData> {
               itemBuilder: (BuildContext context, int index) {
                 return GestureDetector(
                   onLongPress: () async {
-                    print('Long Press');
                     await DatabaseHelper.instance.delete(body[index]['_id']);
+                    HapticFeedback.heavyImpact();
+                    Fluttertoast.showToast(
+                      msg: 'News deleted.',
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.grey[600],
+                      textColor: Colors.grey[300],
+                      fontSize: 15.0,
+                    );
                     setState(() {});
                   },
                   child: Container(
@@ -461,7 +461,7 @@ class _LocalDataState extends State<LocalData> {
                         ),
                         Container(
                           child: Text(
-                            body[index]['content'],
+                            body[index]['description'],
                             style: TextStyle(
                               fontSize: 25.0,
                             ),
