@@ -1,55 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:rest_api/database/databaseHelper.dart';
+import 'package:rest_api/models/modelController.dart';
 
-class PageDetail extends StatefulWidget {
+// ignore: must_be_immutable
+class PageDetail extends StatelessWidget {
   final List<dynamic> detail;
   final int index;
 
+  NewsController _control = Get.find<NewsController>();
+
   PageDetail(this.detail, this.index);
-
-  @override
-  _PageDetailState createState() => _PageDetailState();
-}
-
-class _PageDetailState extends State<PageDetail> {
-  bool isPressed = true;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          if (widget.detail[widget.index]['_id'] == null) {
+      floatingActionButton: Obx(() {
+        return FloatingActionButton(
+          onPressed: () async {
+            var stateChange = _control.newsList[index];
+            stateChange.fav = !stateChange.fav;
+            _control.newsList[index] = stateChange;
             await DatabaseHelper.instance.insert(
               {
-                DatabaseHelper.title: widget.detail[widget.index]['title'],
-                DatabaseHelper.description: widget.detail[widget.index]
-                    ['description'],
-                DatabaseHelper.urlToImage: widget.detail[widget.index]
-                    ['urlToImage'],
-                DatabaseHelper.author: widget.detail[widget.index]['author'],
-                DatabaseHelper.publishedAt: widget.detail[widget.index]
-                    ['publishedAt'],
+                DatabaseHelper.title: detail[index].title,
+                DatabaseHelper.description: detail[index].description,
+                DatabaseHelper.urlToImage: detail[index].urlToImage,
+                DatabaseHelper.author: detail[index].author,
+                DatabaseHelper.publishedAt: detail[index].publishedAt,
               },
             );
-          }
-          setState(() {
-            isPressed = !isPressed;
-          });
-        },
-        backgroundColor: Colors.grey[850],
-        child: Icon(
-          Icons.favorite,
-          color: isPressed ? Colors.white : Colors.red,
-          size: 30.0,
-        ),
-      ),
+            Get.snackbar(
+              'News Added.',
+              'This news has been succefully added to favorite page.',
+              snackPosition: SnackPosition.BOTTOM,
+            );
+          },
+          backgroundColor: Colors.grey[850],
+          child: Icon(
+            Icons.favorite,
+            color: _control.newsList[index].fav ? Colors.white : Colors.red,
+            size: 30.0,
+          ),
+        );
+      }),
       appBar: AppBar(
         title: Text(
-          widget.detail[widget.index]['title'],
+          detail[index].title,
         ),
       ),
-      body: SafeArea(
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Container(
           margin: EdgeInsets.all(
             10.0,
@@ -62,7 +62,7 @@ class _PageDetailState extends State<PageDetail> {
                     15.0,
                   ),
                   child: Image.network(
-                    widget.detail[widget.index]['urlToImage'],
+                    detail[index].urlToImage,
                   ),
                 ),
               ),
@@ -74,7 +74,7 @@ class _PageDetailState extends State<PageDetail> {
                 children: [
                   Container(
                     child: Text(
-                      widget.detail[widget.index]['author'] ?? 'Unknown',
+                      detail[index].author ?? 'Unknown',
                       style: TextStyle(
                         color: Colors.green,
                         fontSize: 25.0,
@@ -86,7 +86,7 @@ class _PageDetailState extends State<PageDetail> {
                   ),
                   Container(
                     child: Text(
-                      widget.detail[widget.index]['publishedAt'],
+                      detail[index].publishedAt,
                       style: TextStyle(
                         color: Colors.green,
                         fontSize: 20.0,
@@ -100,7 +100,7 @@ class _PageDetailState extends State<PageDetail> {
               ),
               Container(
                 child: Text(
-                  widget.detail[widget.index]['description'],
+                  detail[index].description,
                   style: TextStyle(
                     fontSize: 25.0,
                   ),

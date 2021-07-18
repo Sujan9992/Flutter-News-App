@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rest_api/database/databaseHelper.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 
 class LocalData extends StatefulWidget {
   const LocalData({Key? key}) : super(key: key);
@@ -31,16 +31,14 @@ class _LocalDataState extends State<LocalData> {
                   onLongPress: () async {
                     await DatabaseHelper.instance.delete(body[index]['_id']);
                     HapticFeedback.heavyImpact();
-                    Fluttertoast.showToast(
-                      msg: 'News deleted.',
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.BOTTOM,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.grey[600],
-                      textColor: Colors.grey[300],
-                      fontSize: 15.0,
-                    );
+                    // Fluttertoast.showToast(
+
                     setState(() {});
+                    Get.snackbar(
+                      'News Deleted',
+                      'This news has been deleted successfully.',
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
                   },
                   child: Container(
                     margin: EdgeInsets.all(10.0),
