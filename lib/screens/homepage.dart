@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:rest_api/models/modelController.dart';
 import 'package:rest_api/screens/detailsPage.dart';
 import 'package:rest_api/screens/favoritePage.dart';
-import 'package:rest_api/services/api.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
@@ -15,26 +14,27 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   ScrollController _scrollController = ScrollController();
   NewsController controller = Get.put(NewsController());
+  int page = 1;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _scrollController.addListener(() {
-  //     if (_scrollController.position.pixels ==
-  //         _scrollController.position.maxScrollExtent) {
-  //       getMoreData();
-  //     } else if (_scrollController.position.pixels ==
-  //         _scrollController.position.minScrollExtent) {
-  //       getPreviousData();
-  //     }
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        page++;
+        controller.fetchNews(page);
+        // print(controller.page.value);
+        // setState(() {});
+      }
+    });
+  }
 
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  //   _scrollController.dispose();
-  // }
+  @override
+  void dispose() {
+    super.dispose();
+    _scrollController.dispose();
+  }
 
   // void getMoreData() {
   //   page++;
@@ -172,7 +172,7 @@ class _HomepageState extends State<Homepage> {
                                                   child: Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
-                                                            .start,
+                                                            .stretch,
                                                     children: [
                                                       Text(
                                                         controller

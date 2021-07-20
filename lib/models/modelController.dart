@@ -5,19 +5,22 @@ import 'package:rest_api/services/api.dart';
 class NewsController extends GetxController {
   var isLoading = true.obs;
   var newsList = <NewsModel>[].obs;
-  // var favState = true.obs;
-  // bool get state => favState.value;
-  var page = 1;
+  int page = 1;
   // int get pageNo => page.value;
 
   @override
   void onInit() {
     super.onInit();
-    fetchNews();
+    fetchNews(page);
   }
 
-  void fetchNews() async {
-    var items = await ApiFetch().getNews();
+  // pagePlus() {
+  //   page++;
+  //   print(page);
+  // }
+
+  void fetchNews(page) async {
+    var items = await ApiFetch(page: page).getNews();
     try {
       isLoading(true);
       for (var item in items) {

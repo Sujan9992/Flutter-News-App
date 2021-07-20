@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart';
 
 class ApiFetch {
-  int page = 1;
+  int page;
+  ApiFetch({required this.page});
   Future<List> getNews() async {
     final String url =
         'https://newsapi.org/v2/everything?apikey=fb1fe456b3af4227b24584a13b567a65&domains=wsj.com&pageSize=10&page=$page&language=en';
