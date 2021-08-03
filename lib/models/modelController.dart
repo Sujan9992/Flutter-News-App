@@ -14,11 +14,6 @@ class NewsController extends GetxController {
     fetchNews(page);
   }
 
-  // pagePlus() {
-  //   page++;
-  //   print(page);
-  // }
-
   void fetchNews(page) async {
     var items = await ApiFetch(page: page).getNews();
     try {

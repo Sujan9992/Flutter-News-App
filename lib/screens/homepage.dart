@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:rest_api/models/modelController.dart';
 import 'package:rest_api/screens/detailsPage.dart';
 import 'package:rest_api/screens/favoritePage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:rest_api/screens/dummy.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({Key? key}) : super(key: key);
@@ -19,13 +21,44 @@ class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
+    final fbm = FirebaseMessaging.instance;
+    // fbm.requestPermission();
+    fbm.getToken().then((value) => print(value));
+    FirebaseMessaging.instance.getInitialMessage().then((value) {
+      if (value != null) {
+        Get.to(() => Dummy());
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => Dummy(),
+        //   ),
+        // );
+      }
+    });
+    FirebaseMessaging.onMessage.listen((message) {
+      print('--------------------');
+      print('Message Received.');
+
+      Get.to(() => Dummy());
+      print('--------------------');
+      //Get.snackbar('Notification', message.notification!.body!,
+      //snackPosition: SnackPosition.BOTTOM);
+      // return;
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      print('--------------------');
+      print('Message Clicked');
+      Get.to(() => Dummy());
+      print('--------------------');
+      //return;
+    });
+
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         page++;
         controller.fetchNews(page);
-        // print(controller.page.value);
-        // setState(() {});
       }
     });
   }
@@ -35,27 +68,6 @@ class _HomepageState extends State<Homepage> {
     super.dispose();
     _scrollController.dispose();
   }
-
-  // void getMoreData() {
-  //   page++;
-  //   setState(() {});
-  //   ApiFetch.getNews(page).then(
-  //     (value) => _scrollController.jumpTo(0.1),
-  //   );
-  // }
-
-  // void getPreviousData() {
-  //   if (page >= 2) {
-  //     page--;
-  //     setState(() {});
-  //     ApiFetch.getNews(page).then(
-  //       (value) => _scrollController
-  //           .jumpTo(_scrollController.position.maxScrollExtent - 0.1),
-  //     );
-  //   } else {
-  //     page = 1;
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
